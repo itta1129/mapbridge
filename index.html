@@ -1,0 +1,94 @@
+<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>MapBridge</title><style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@600;700&display=swap');
+:root{--bg:#0f0f14;--card:#1a1a22;--border:#2c2c3a;--accent:#4f8aff;--accent2:#6c63ff;--text:#eeeef5;--muted:#72728a;--success:#34d399;--error:#f87171;--warn:#fbbf24;--pin:#ff5f5f;--r:16px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:32px 16px 80px;gap:16px;max-width:480px;margin:0 auto}
+.logo{display:flex;align-items:center;gap:10px}
+h1{font-family:'Space Grotesk',sans-serif;font-size:1.8rem;font-weight:700;color:#fff}
+.tagline{font-size:.83rem;color:var(--muted);text-align:center;line-height:1.6}
+.tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%}
+.tab{padding:13px 8px;border-radius:12px;border:1.5px solid var(--border);background:var(--card);color:var(--muted);font-family:'Space Grotesk',sans-serif;font-size:.88rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px}
+.tab.active{border-color:var(--accent);color:#fff;background:rgba(79,138,255,.12)}
+.card{width:100%;background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:22px}
+.panel{display:none;flex-direction:column;gap:14px}
+.panel.active{display:flex}
+.steps{display:flex;flex-direction:column;gap:8px}
+.step{display:flex;align-items:flex-start;gap:10px;font-size:.83rem;color:var(--muted);line-height:1.5}
+.step-n{min-width:22px;height:22px;border-radius:50%;background:rgba(79,138,255,.15);color:var(--accent);font-size:.72rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.upload-area{width:100%;position:relative}
+.upload-label{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;min-height:150px;border:2px dashed var(--border);border-radius:12px;padding:20px}
+.upload-icon{font-size:2.4rem}
+.upload-text{font-size:.88rem;color:var(--muted);text-align:center;line-height:1.5}
+.upload-text strong{color:var(--text);display:block;font-size:.95rem}
+#fileInput{position:absolute;top:0;left:0;width:100%;height:100%;opacity:0}
+.preview-wrap{position:relative;display:none}
+#previewImg{width:100%;max-height:260px;object-fit:contain;border-radius:10px;display:block}
+.remove-btn{position:absolute;top:8px;right:8px;background:rgba(0,0,0,.7);border:none;color:#fff;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center}
+.url-wrap{position:relative}
+textarea{width:100%;background:rgba(0,0,0,.3);border:1.5px solid var(--border);border-radius:10px;color:var(--text);font-size:.9rem;line-height:1.6;padding:12px 40px 12px 14px;resize:none;height:96px;outline:none}
+.clear-x{position:absolute;top:10px;right:10px;background:none;border:none;color:var(--muted);font-size:1rem}
+.hint{font-size:.75rem;color:var(--muted);line-height:1.5}
+.cta{width:100%;padding:15px;border:none;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-family:'Space Grotesk',sans-serif;font-size:1rem;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px}
+.cta:disabled{opacity:.35}
+.status-note{font-size:.75rem;color:var(--muted);text-align:center;min-height:16px}
+.result-wrap{width:100%}
+.result-card{width:100%;border-radius:var(--r);border:1px solid var(--border);background:var(--card);padding:18px 20px;display:flex;flex-direction:column;gap:12px}
+.result-card.ok{border-color:rgba(52,211,153,.25)}
+.result-card.err{border-color:rgba(248,113,113,.25)}
+.result-top{display:flex;align-items:center;gap:8px}
+.dot{width:8px;height:8px;border-radius:50%}
+.dot.ok{background:var(--success)}
+.dot.err{background:var(--error)}
+.result-name{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:.95rem;color:#fff;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.result-addr{font-size:.78rem;color:var(--muted);line-height:1.5}
+.result-coords{font-size:.75rem;color:var(--muted);line-height:1.8}
+.result-coords b{color:var(--text)}
+.conf{display:inline-block;font-size:.68rem;font-weight:600;padding:2px 8px;border-radius:8px}
+.conf-high{background:rgba(52,211,153,.15);color:var(--success)}
+.conf-medium{background:rgba(251,191,36,.15);color:var(--warn)}
+.conf-low{background:rgba(248,113,113,.15);color:var(--error)}
+.gmap-btn{display:flex;align-items:center;justify-content:center;gap:7px;padding:14px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;text-decoration:none;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:.95rem}
+.err-msg{font-size:.83rem;color:var(--error);line-height:1.7}
+.retry-btn{background:none;border:1.5px solid var(--border);border-radius:10px;color:var(--muted);font-size:.85rem;padding:10px;width:100%}
+.spinner{display:inline-block;width:18px;height:18px;border:2.5px solid rgba(255,255,255,.25);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style></head><body>
+<div class="logo"><svg width="28" height="34" viewBox="0 0 30 36"><path d="M15 0C6.716 0 0 6.716 0 15c0 9.941 13.5 21 15 21S30 24.941 30 15C30 6.716 23.284 0 15 0z" fill="#ff5f5f"/><circle cx="15" cy="15" r="6.5" fill="#0f0f14"/><circle cx="15" cy="15" r="2.5" fill="#4f8aff"/></svg><h1>MapBridge</h1></div>
+<p class="tagline">Airbnb・Booking・Agodaの物件を<br>そのままGoogle Mapsで開く</p>
+<div class="tabs"><div class="tab active" id="tab-ss" onclick="switchTab('ss')">📸 地図スクショ</div><div class="tab" id="tab-url" onclick="switchTab('url')">🔗 URL・施設名</div></div>
+<div class="card">
+<div class="panel active" id="panel-ss">
+<div class="steps"><div class="step"><div class="step-n">1</div><span>Airbnbアプリで物件の<strong>地図画面</strong>を開く</span></div><div class="step"><div class="step-n">2</div><span>スクリーンショットを撮る</span></div><div class="step"><div class="step-n">3</div><span>下のボタンでそのスクショを選んで送信</span></div></div>
+<div class="upload-area"><label class="upload-label" for="fileInput"><div class="upload-icon">🗺️</div><div class="upload-text"><strong>スクショを選択してアップロード</strong>タップして写真ライブラリから選ぶ</div></label><input type="file" id="fileInput" accept="image/*"></div>
+<div class="preview-wrap" id="previewWrap"><img id="previewImg" alt="preview"><button class="remove-btn" onclick="removeImg()">✕</button></div>
+<p class="hint">📍 物件のピンや地名が写っているほど精度が上がります</p>
+<button class="cta" id="ssBtn" onclick="analyzeScreenshot()" disabled><span id="ssBtnInner">📍 スクショを解析してGoogle Mapsで開く</span></button>
+<div class="status-note" id="ssNote"></div>
+</div>
+<div class="panel" id="panel-url">
+<div class="url-wrap"><textarea id="urlInput" placeholder="URLや施設名・住所を入力"></textarea><button class="clear-x" onclick="clearURL()">✕</button></div>
+<p class="hint">URLや施設名を貼り付け → AIがWeb検索して座標を特定 → Google Mapsが開きます</p>
+<button class="cta" id="urlBtn" onclick="analyzeURL()"><span id="urlBtnInner">🔍 検索してGoogle Mapsで開く</span></button>
+<div class="status-note" id="urlNote"></div>
+</div>
+</div>
+<div class="result-wrap" id="resultWrap"></div>
+<script>
+var API_KEY='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';
+function switchTab(t){['ss','url'].forEach(function(n){document.getElementById('tab-'+n).classList.toggle('active',n===t);document.getElementById('panel-'+n).classList.toggle('active',n===t);});clearResult();}
+var imgBase64=null,imgMime='image/jpeg';
+document.getElementById('fileInput').addEventListener('change',function(e){var f=e.target.files&&e.target.files[0];if(!f)return;imgMime=f.type||'image/jpeg';var r=new FileReader();r.onload=function(ev){var d=ev.target.result;imgBase64=d.split(',')[1];document.getElementById('previewImg').src=d;document.getElementById('previewWrap').style.display='block';document.querySelector('.upload-label').style.display='none';document.getElementById('ssBtn').disabled=false;clearResult();};r.readAsDataURL(f);});
+function removeImg(){imgBase64=null;document.getElementById('previewWrap').style.display='none';document.querySelector('.upload-label').style.display='flex';document.getElementById('ssBtn').disabled=true;document.getElementById('fileInput').value='';clearResult();}
+async function analyzeScreenshot(){if(!imgBase64)return;setLoading('ss',true,'AIが地図を解析中…');clearResult();try{var r=await callClaudeImage(imgBase64,imgMime);renderResult(r);}catch(e){renderError(e.message);}finally{setLoading('ss',false);}}
+async function callClaudeImage(b64,mime){var vm=['image/jpeg','image/png','image/gif','image/webp'];var sm=vm.includes(mime)?mime:'image/jpeg';var res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':API_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:600,messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:sm,data:b64}},{type:'text',text:'この画像はAirbnb等の宿泊アプリの地図スクリーンショットです。物件ピンの緯度経度を特定してください。JSONのみで回答:{"lat":数値,"lng":数値,"name":"地域名","address":"住所","confidence":"high/medium/low","note":"根拠"} 不可能な場合:{"error":"理由"}'}]}]})});if(!res.ok){var e=await res.json().catch(function(){return{};});throw new Error(e.error&&e.error.message||'APIエラー');}var data=await res.json();var raw=data.content.map(function(c){return c.text||'';}).join('').replace(/```json|```/g,'').trim();var m=raw.match(/\{[\s\S]*\}/);if(!m)throw new Error('解析失敗');var p=JSON.parse(m[0]);if(p.error)throw new Error(p.error);if(!validCoord(p.lat,p.lng))throw new Error('座標を特定できませんでした');p.method='screenshot';return p;}
+async function analyzeURL(){var raw=document.getElementById('urlInput').value.trim();if(!raw)return;var q=urlPattern(raw);if(q){renderResult(q);return;}setLoading('url',true,'Web検索で場所を特定中…');clearResult();try{var r=await callClaudeSearch(raw);renderResult(r);}catch(e){renderError(e.message);}finally{setLoading('url',false);}}
+function urlPattern(url){var pp=[[/[?&]latitude=([-\d.]+).*?longitude=([-\d.]+)/i,false],[/[?&]lat=([-\d.]+).*?[?&]lng=([-\d.]+)/i,false],[/@([-\d.]+),([-\d.]+)/,false]];for(var i=0;i<pp.length;i++){var m=url.match(pp[i][0]);if(m){var a=parseFloat(m[1]),b=parseFloat(m[2]);if(validCoord(a,b))return{lat:a,lng:b,method:'url-pattern',confidence:'high'};}}return null;}
+async function callClaudeSearch(input){var isURL=/^https?:\/\//.test(input);var prompt=isURL?'宿泊予約サービスの物件URLです。web_searchで住所・緯度経度を調べてJSONのみで回答:{"lat":数値,"lng":数値,"name":"施設名","address":"住所","confidence":"high/medium/low","method":"ai-url","note":"根拠"} URL:'+input:'「'+input+'」をweb_searchで検索しJSONのみで回答:{"lat":数値,"lng":数値,"name":"施設名","address":"住所","confidence":"high/medium/low","method":"ai-name","note":"根拠"}';var messages=[{role:'user',content:prompt}];var tools=[{type:'web_search_20250305',name:'web_search'}];var finalText='';for(var i=0;i<6;i++){var res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':API_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1000,tools:tools,messages:messages})});if(!res.ok){var e=await res.json().catch(function(){return{};});throw new Error(e.error&&e.error.message||'APIエラー');}var data=await res.json();var texts=data.content.filter(function(c){return c.type==='text';}).map(function(c){return c.text;}).join('');if(texts)finalText=texts;if(data.stop_reason==='end_turn')break;var tu=data.content.filter(function(c){return c.type==='tool_use';});if(!tu.length)break;messages.push({role:'assistant',content:data.content});messages.push({role:'user',content:tu.map(function(t){return{type:'tool_result',tool_use_id:t.id,content:''};})});}var clean=finalText.replace(/```json|```/g,'').trim();var m=clean.match(/\{[\s\S]*\}/);if(!m)throw new Error('解析失敗');var p=JSON.parse(m[0]);if(p.error)throw new Error(p.error);if(!validCoord(p.lat,p.lng))throw new Error('座標を取得できませんでした');return p;}
+function renderResult(d){var url='https://www.google.com/maps?q='+d.lat+','+d.lng+'&z=17';var cc={high:'conf-high',medium:'conf-medium',low:'conf-low'}[d.confidence]||'conf-medium';var cl={high:'高精度',medium:'中精度',low:'低精度'}[d.confidence]||'';document.getElementById('resultWrap').innerHTML='<div class="result-card ok"><div class="result-top"><div class="dot ok"></div><div class="result-name">'+x(d.name||'場所を特定しました')+'</div></div>'+(d.address?'<div class="result-addr">📍 '+x(d.address)+'</div>':'')+'<div class="result-coords">緯度 <b>'+d.lat.toFixed(6)+'</b>　経度 <b>'+d.lng.toFixed(6)+'</b><br><span class="conf '+cc+'">'+cl+'</span></div><a class="gmap-btn" href="'+url+'" target="_blank">🗺 Google Mapsで開く</a></div>';setTimeout(function(){try{window.open(url,'_blank');}catch(e){}},300);}
+function renderError(msg){document.getElementById('resultWrap').innerHTML='<div class="result-card err"><div class="result-top"><div class="dot err"></div><div class="result-name">場所を特定できませんでした</div></div><div class="err-msg">'+x(msg)+'</div><button class="retry-btn" onclick="clearResult()">↩ 閉じる</button></div>';}
+function setLoading(mode,on,msg){if(mode==='ss'){document.getElementById('ssBtnInner').innerHTML=on?'<span class="spinner"></span> 解析中…':'📍 スクショを解析してGoogle Mapsで開く';document.getElementById('ssBtn').disabled=on;document.getElementById('ssNote').textContent=on?(msg||''):'';}else{document.getElementById('urlBtnInner').innerHTML=on?'<span class="spinner"></span> 検索中…':'🔍 検索してGoogle Mapsで開く';document.getElementById('urlBtn').disabled=on;document.getElementById('urlNote').textContent=on?(msg||''):'';}}
+function clearResult(){document.getElementById('resultWrap').innerHTML='';}
+function clearURL(){document.getElementById('urlInput').value='';clearResult();}
+function validCoord(lat,lng){return typeof lat==='number'&&typeof lng==='number'&&!isNaN(lat)&&!isNaN(lng)&&lat>=-90&&lat<=90&&lng>=-180&&lng<=180&&!(lat===0&&lng===0);}
+function x(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+</script></body></html>
